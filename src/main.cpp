@@ -294,7 +294,7 @@ void loop()
 
 float calculate_max_speed()
 {
-  if (abs(bmePressure - activePhase.target) <= 30.0f)
+  if (abs(bmePressure - activePhase.target) >= 30.0f)
   {
     return MAX_SPEED;
   } else {
