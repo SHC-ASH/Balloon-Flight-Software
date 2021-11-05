@@ -13,7 +13,7 @@
 #define VELOCITY_BUFFER_SIZE 5
 
 #define LED_PIN 13
-#define CAM_PIN 15
+#define CAM_PIN 11
 #define VENT_MOTOR 9
 #define DROP_MOTOR 10
 
@@ -86,13 +86,23 @@ struct FlightPhase {
 
 FlightPhase activePhase;
 int flightPhase;
-int NUM_FLIGHT_PHASES = 4;
+int NUM_FLIGHT_PHASES = 5;
+
+FlightPhase flightPlanTest[] {
+  {5, 12, 40, 0, true},
+  {5, 12, 41, 700, false},
+  {5, 12, 42, 998, false},
+  {5, 12, 43, 1050, false},
+  {5, 12, 44, 0, true}
+};
 
 FlightPhase flightPlan[] {
-  {5, 3, 35, 0, true},
-  {5, 3, 36, 700, false},
-  {5, 3, 37, 1050, false},
-  {5, 3, 38, 0, true}
+  {5, 13, 0, 0, true},
+  {5, 13, 10, 624, false},
+  {5, 20, 0, 700, false},
+  {6, 1, 797, false},
+  {6, 4, 1030, false}
+
 };
 
 // Function Definitions
@@ -116,6 +126,7 @@ void setup()
   pinMode(VENT_MOTOR, OUTPUT);
   pinMode(DROP_MOTOR, OUTPUT);
   digitalWrite(CAM_PIN, HIGH);
+  camState = 1;
   
   bme.begin();
   IMU.begin();
@@ -230,14 +241,18 @@ void loop()
       }
   }
 
+  ventState = false;
+  dropState = false;
+
   activePhase = flightPlan[flightPhase];
 
+  /*
   if (bmePressure > activePhase.target + PRESSURE_MARGIN && bmePressure < activePhase.target - PRESSURE_MARGIN)
   {
     timeEnteringPressureTarget = millis();
-  }
+  }*/
 
-  if (!activePhase.idle && (millis() - timeEnteringPressureTarget < MARGIN_STABILITY_TIME))
+  if (!activePhase.idle)// && (millis() - timeEnteringPressureTarget < MARGIN_STABILITY_TIME))
   {
     if (bmePressure < activePhase.target)
     {
@@ -274,11 +289,10 @@ void loop()
   }
 
   updateMotors();
-  ventState = false;
-  dropState = false;
 
   if (flightPhase == NUM_FLIGHT_PHASES - 1)
   {
+    MAX_SPEED = 5.0;
     return;
   }
 
